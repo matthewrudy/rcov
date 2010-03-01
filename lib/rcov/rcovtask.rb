@@ -55,6 +55,9 @@ module Rcov
     # Request that the tests be run with the warning flag set.
     # E.g. warning=true implies "ruby -w" used to run the tests.
     attr_accessor :warning
+    
+    # Add Rake task descriptions to the generated tasks
+    attr_accessor :add_descriptions
 
     # Glob pattern to match test files. (default is 'test/test*.rb')
     attr_accessor :pattern
@@ -86,6 +89,7 @@ module Rcov
       @test_files = nil
       @verbose = false
       @warning = false
+      @add_descriptions = true
       @rcov_opts = ["--text-report"]
       @ruby_opts = []
       @output_dir = "coverage"
@@ -98,7 +102,7 @@ module Rcov
     def define
       lib_path = @libs.join(File::PATH_SEPARATOR)
       actual_name = Hash === name ? name.keys.first : name
-      unless Rake.application.last_comment
+      if add_descriptions && !Rake.application.last_comment
         desc "Analyze code coverage with tests" + 
           (@name==:rcov ? "" : " for #{actual_name}")
       end
@@ -121,7 +125,7 @@ module Rcov
         end
       end
 
-      desc "Remove rcov products for #{actual_name}"
+      desc "Remove rcov products for #{actual_name}" if add_descriptions
       task paste("clobber_", actual_name) do
         rm_r @output_dir rescue nil
       end
